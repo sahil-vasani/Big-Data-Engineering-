@@ -176,11 +176,12 @@ The project exposes RESTful endpoints using **FastAPI** to access enriched book 
 
 ### 📌 Available Endpoints
 
-| Method | Endpoint | Description |
-|------|---------|------------|
-| GET | `/books` | Fetch all books |
-| GET | `/books/{id}` | Fetch a single book by ID |
-| GET | `/search` | Search books by title, author, or ISBN |
+| No. | Method | Endpoint | Description |
+|----|--------|----------|-------------|
+| 1 | GET | `/` | Health check endpoint to verify FastAPI is running |
+| 2 | GET | `/books` | Fetch a limited number of books using query parameter |
+| 3 | GET | `/search` | Search books by ISBN |
+| 4 | GET | `/books/{ISBN}` | Fetch a single book by ISBN |
 ```
  
 ```
