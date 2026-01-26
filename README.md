@@ -1,76 +1,174 @@
-# Big-Data-Engineering
-📚 Book Description Enrichment Pipeline
+# 📚 Book Description Enrichment Pipeline
+### Big Data Engineering Mini Project
 
-Big Data Engineering Mini Project
+A comprehensive data engineering pipeline to enrich library book records with missing descriptions using multiple public data sources, followed by structured storage in SQLite and API-based access via FastAPI.
 
-📌 Project Overview
+---
 
-This project focuses on enriching a library book dataset with missing descriptions by collecting data from multiple public sources, cleaning it, storing it in a relational database, and exposing it through a FastAPI service.
+## 📑 Table of Contents
+- [Overview](#-overview)
+- [Problem Statement](#-problem-statement)
+- [Data Sources](#-data-sources)
+- [Dataset Evolution](#-dataset-evolution)
+- [Final Data Schema](#-final-data-schema)
+- [Database Design](#-database-design)
+- [API Endpoints](#-api-endpoints-fastapi)
+- [Technologies Used](#-technologies-used)
+- [Project Structure](#-project-structure)
+- [Pipeline Workflow](#-pipeline-workflow)
+- [How to Run](#-how-to-run)
+- [Key Learnings](#-key-learnings)
 
-The main challenge was that many books (especially Indian publications) did not have descriptions available in a single source. To solve this, a multi-stage data collection and merging strategy was used.
-🧩 Data Sources Used
+---
 
-  * Local CSV (Library Data)
+## 📌 Overview
+This project implements an **end-to-end data enrichment pipeline** that:
 
-  * OpenLibrary API
+- Starts from a raw library dataset with **no book descriptions**
+- Collects missing descriptions from **multiple external sources**
+- Applies **multi-stage fallback logic** to maximize coverage
+- Cleans and merges data into a **final unified dataset**
+- Stores enriched data in **SQLite**
+- Serves data using **FastAPI REST endpoints**
 
-  * Google Books (HTML scraping + API fallback)
+This project reflects **real-world data engineering challenges**, especially for **Indian publications**, where book descriptions are often unavailable from a single source.
 
-🗂 Dataset Evolution (Step-by-Step)
-1️⃣ Base Dataset (No Descriptions) 
-File: dau_library.csv 
-This is the original library dataset 
-Contains metadata such as: 
-Acc.
- Date,
- Acc. No.,
- Title,ISBN,Author/Editor,Ed./Vol.,Place & Publisher,Year,Page(s),Class No./Book No. 
+---
+
+## ❓ Problem Statement
+The original dataset (`dau_library.csv`) did not contain a book description column. Additionally:
+
+- OpenLibrary provides **limited coverage** for Indian books
+- ISBN-based lookups frequently fail
+- A **single data source was insufficient**
+
+To solve this, a **multi-source enrichment and fallback strategy** was designed.
+
+---
+
+## 🧩 Data Sources
+- **Local Library Dataset (CSV)**
+- **OpenLibrary API** (ISBN-based)
+- **Google Books**
+  - HTML scraping
+  - API fallback
+  - Title + Author search
+
+---
+
+## 🗂 Dataset Evolution
+
+### 1️⃣ Base Dataset (No Descriptions)
+**File:** `dau_library.csv`
+
+Contains:
+- Accession Date
+- Accession Number
+- Title
+- ISBN
+- Author / Editor
+- Edition / Volume
+- Publisher
+- Year
+- Pages
+- Classification Number
+
 ❌ No description column
 
-2️⃣ Description Fetch Using ISBN (OpenLibrary) 
-File: OpenLibrary_5000.csv 
-Selected first 5,000 rows from dau_library.csv 
-Used ISBN to fetch descriptions from OpenLibrary API 
-Result: 
-Many descriptions fetched 
-❌ Many "Not Found" values (OpenLibrary lacks Indian books)
+---
 
+### 2️⃣ ISBN-Based Description Fetch (OpenLibrary)
+**File:** `OpenLibrary_5000.csv`
 
-3️⃣ Google Books HTML Scraping (Large-Scale) 
-File: HTML_tag_through_All_36000.csv 
-Used Google Books as a second source 
-Scraped descriptions using: 
-ISBN 
-HTML parsing (tags) 
-Covered ~36,000 books 
-Result: 
-More coverage than OpenLibrary 
-Still some missing descriptions
+- Selected first **5,000 records**
+- Used ISBN to fetch descriptions from OpenLibrary API
 
-4️⃣ First Merge (OpenLibrary + Google Books)
+**Result:**
+- Partial success
+- Many `"Not Found"` values
 
-File: Final_Merged_Descriptions.csv 
-Logic: 
-Primary source → Google Books (HTML_tag_through_All_36000.csv) 
-Fallback source → OpenLibrary (OpenLibrary_5000.csv) 
-If Google Books description was null or not found: 
-Filled it using OpenLibrary description (if available) 
-Result: 
-Significant reduction in missing descriptions
+---
 
-5️⃣ Title + Author Based Fetch (Final Fallback) 
-File: Final_GoogleBooks_Descriptions (1).csv 
-Still some rows had "Not Found" descriptions 
-These books did not work well with ISBN 
-New strategy: 
-Fetch description using Title + Author from Google Books 
-Result: 
-Many additional descriptions recovered
+### 3️⃣ Google Books HTML Scraping (Large Scale)
+**File:** `HTML_tag_through_All_36000.csv`
 
-6️⃣ Final Clean Dataset 
-File: target_updated.csv 
-Merged: 
-Final_Merged_Descriptions.csv 
-Final_GoogleBooks_Descriptions (1).csv  
+- Scraped descriptions using ISBN
+- Parsed HTML tags from Google Books
+- Covered ~36,000 records
 
-✅ This file is used for database insertion
+**Result:**
+- Higher coverage than OpenLibrary
+- Still some missing descriptions
+
+---
+
+### 4️⃣ First Merge (Google Books + OpenLibrary)
+**File:** `Final_Merged_Descriptions.csv`
+
+**Merge Logic:**
+- Primary source → Google Books
+- Fallback source → OpenLibrary
+- If Google Books description is missing:
+  - Fill using OpenLibrary description
+
+**Result:**
+- Significant reduction in missing descriptions
+
+---
+
+### 5️⃣ Title + Author Based Fetch (Final Fallback)
+**File:** `Final_GoogleBooks_Descriptions (1).csv`
+
+- Applied to remaining `"Not Found"` rows
+- Used **Title + Author** based search
+- Cleaned text (lowercase, punctuation removal)
+
+**Result:**
+- Many additional descriptions recovered
+
+---
+
+### 6️⃣ Final Clean Dataset
+**File:** `target_updated.csv`
+
+Merged:
+- `Final_Merged_Descriptions.csv`
+- `Final_GoogleBooks_Descriptions (1).csv`
+
+✅ Used for SQLite database insertion
+
+---
+
+## 🧾 Final Data Schema
+
+| Column Name | Description |
+|------------|------------|
+| acc_no | Accession number |
+| title | Book title |
+| isbn | ISBN number |
+| author_editor | Author / Editor |
+| publisher | Publisher details |
+| year | Publication year |
+| pages | Number of pages |
+| class_no | Classification number |
+| description | Enriched book description |
+
+---
+
+## 🗄 Database Design
+**Database:** `library.db`
+
+```sql
+CREATE TABLE books (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    acc_no TEXT,
+    title TEXT,
+    isbn TEXT,
+    author_editor TEXT,
+    publisher TEXT,
+    year INTEGER,
+    pages INTEGER,
+    class_no TEXT,
+    description TEXT
+);
+
