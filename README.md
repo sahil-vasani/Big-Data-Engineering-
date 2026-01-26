@@ -13,9 +13,7 @@ A comprehensive data engineering pipeline to enrich library book records with mi
 - [Final Data Schema](#-final-data-schema)
 - [Database Design](#-database-design)
 - [API Endpoints](#-api-endpoints-fastapi)
-- [Technologies Used](#-technologies-used) 
-- [How to Run](#-how-to-run)
-- [Key Learnings](#-key-learnings)
+- [Technologies Used](#-technologies-used)  
 
 ---
 
@@ -168,27 +166,13 @@ CREATE TABLE books (
     pages INTEGER,
     class_no TEXT,
     description TEXT
-);
+);```
 
 --- 
-
+```
 ## 🚀 API Endpoints (FastAPI)
-<a id="-api-endpoints-fastapi"></a>
 
-The project exposes RESTful endpoints using **FastAPI** to access enriched book data stored in SQLite.
-
-### 🔗 Quick Navigation
-- [Overview](#-overview)
-- [Problem Statement](#-problem-statement)
-- [Data Sources](#-data-sources)
-- [Dataset Evolution](#-dataset-evolution)
-- [Final Data Schema](#-final-data-schema)
-- [Database Design](#-database-design)
-- [Technologies Used](#-technologies-used)
-- [How to Run](#-how-to-run)
-- [Key Learnings](#-key-learnings)
-
----
+The project exposes RESTful endpoints using **FastAPI** to access enriched book data stored in **SQLite**.
 
 ### 📌 Available Endpoints
 
@@ -197,12 +181,24 @@ The project exposes RESTful endpoints using **FastAPI** to access enriched book 
 | GET | `/books` | Fetch all books |
 | GET | `/books/{id}` | Fetch a single book by ID |
 | GET | `/search` | Search books by title, author, or ISBN |
+```
+---
+ 
+```
+## 🧰 Technologies Used
+
+- **Python** – Core programming language
+- **Pandas** – Data cleaning, merging, and preprocessing
+- **Requests** – API calls to OpenLibrary and Google Books
+- **BeautifulSoup** – HTML scraping from Google Books
+- **SQLite** – Lightweight relational database for storage
+- **FastAPI** – REST API development
+- **Uvicorn** – ASGI server for FastAPI
+- **Redis (Optional)** – Caching frequently accessed queries
 
 ---
 
-### 🔍 Example Request
-```http
-GET /search?title=data
+ 
 
 
 
