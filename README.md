@@ -171,10 +171,27 @@ CREATE TABLE books (
 );
 
 ---
+---
 
 ## 🚀 API Endpoints (FastAPI)
+<a id="-api-endpoints-fastapi"></a>
 
 The project exposes RESTful endpoints using **FastAPI** to access enriched book data stored in SQLite.
+
+### 🔗 Quick Navigation
+- [Overview](#-overview)
+- [Problem Statement](#-problem-statement)
+- [Data Sources](#-data-sources)
+- [Dataset Evolution](#-dataset-evolution)
+- [Final Data Schema](#-final-data-schema)
+- [Database Design](#-database-design)
+- [Technologies Used](#-technologies-used)
+- [How to Run](#-how-to-run)
+- [Key Learnings](#-key-learnings)
+
+---
+
+### 📌 Available Endpoints
 
 | Method | Endpoint | Description |
 |------|---------|------------|
@@ -182,38 +199,11 @@ The project exposes RESTful endpoints using **FastAPI** to access enriched book 
 | GET | `/books/{id}` | Fetch a single book by ID |
 | GET | `/search` | Search books by title, author, or ISBN |
 
+---
+
 ### 🔍 Example Request
 ```http
-GET /search?title=data```
+GET /search?title=data
 
----
-
-## 🛠 Technologies Used
-- Python 3.9+
-- Pandas
-- Requests
-- BeautifulSoup
-- SQLite3
-- FastAPI
-- Uvicorn
-- Jupyter Notebook
-
----
-
-## ▶️ How to Run
-
-### 1️⃣ Install Dependencies
-Make sure Python 3.9+ is installed, then run:
-```bash
-pip install -r requirements.txt
-
-2️⃣ Start FastAPI Server
-uvicorn main:app --reload
-
-3️⃣ Open API Documentation
-Open your browser and visit:
-http://127.0.0.1:8000/docs
-
- 
 
 
