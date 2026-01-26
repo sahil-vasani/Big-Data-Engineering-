@@ -182,7 +182,6 @@ The project exposes RESTful endpoints using **FastAPI** to access enriched book 
 | GET | `/books/{id}` | Fetch a single book by ID |
 | GET | `/search` | Search books by title, author, or ISBN |
 ```
----
  
 ```
 ## 🧰 Technologies Used
@@ -193,8 +192,7 @@ The project exposes RESTful endpoints using **FastAPI** to access enriched book 
 - **BeautifulSoup** – HTML scraping from Google Books
 - **SQLite** – Lightweight relational database for storage
 - **FastAPI** – REST API development
-- **Uvicorn** – ASGI server for FastAPI
-- **Redis (Optional)** – Caching frequently accessed queries
+- **Uvicorn** – ASGI server for FastAPI 
 
 ---
 
