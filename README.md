@@ -170,8 +170,7 @@ CREATE TABLE books (
     description TEXT
 );
 
----
----
+--- 
 
 ## 🚀 API Endpoints (FastAPI)
 <a id="-api-endpoints-fastapi"></a>
