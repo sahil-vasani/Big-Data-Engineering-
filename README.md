@@ -8,7 +8,7 @@ A comprehensive data engineering pipeline to enrich library book records with mi
 ## 📑 Table of Contents
 - [Overview](#-overview)
 - [Problem Statement](#-problem-statement)
-- [Data Sources](#-data-sources)
+- [Data Sources](#-data-sources )
 - [Dataset Evolution](#-dataset-evolution )
 - [Final Data Schema](#-final-data-schema )
 - [Database Design](#-database-design )
