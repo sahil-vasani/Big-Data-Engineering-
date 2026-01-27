@@ -8,12 +8,12 @@ A comprehensive data engineering pipeline to enrich library book records with mi
 ## 📑 Table of Contents
 - [Overview](#-overview)
 - [Problem Statement](#-problem-statement)
-- [Data Sources](#-data-sources)
-- [Dataset Evolution](#-dataset-evolution)
-- [Final Data Schema](#-final-data-schema)
-- [Database Design](#-database-design)
-- [API Endpoints](#-api-endpoints-fastapi)
-- [Technologies Used](#-technologies-used)  
+- [Data Sources](#-data-sources )
+- [Dataset Evolution](#-dataset-evolution )
+- [Final Data Schema](#-final-data-schema )
+- [Database Design](#-database-design )
+- [API Endpoints](#-api-endpoints-fastapi )
+- [Technologies Used](#-technologies-used )  
 
 ---
 
