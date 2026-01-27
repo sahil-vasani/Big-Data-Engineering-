@@ -3,7 +3,7 @@ import sqlite3
 
 app = FastAPI()
 
-DB_PATH = "db.sqlite3"
+DB_PATH = "D:\\COLLAGE\\DAIICT\\2 - SEM\\BDE\\Project\\Big-Data-Engineering-\\Database\\db.sqlite3"
  
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -40,9 +40,7 @@ def get_books(
 
  
 @app.get("/book")
-def get_book_by_isbn(
-    isbn: str = Query(..., description="ISBN number of the book")
-):
+def get_book_by_isbn(isbn: str):
     isbn = isbn.strip().replace("-", "")
 
     conn = get_db_connection()

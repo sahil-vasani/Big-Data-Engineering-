@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 
 # Read CSV
-df = pd.read_csv("target_updated.csv")
+df = pd.read_csv("D:\\COLLAGE\\DAIICT\\2 - SEM\\BDE\\Project\\Big-Data-Engineering-\\Data\processed\\dau_with_description.csv")
 
 # SQLite connection
 conn = sqlite3.connect("db.sqlite3")
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS books (
     Acc_Date TEXT,
     Acc_No INTEGER PRIMARY KEY,
     Title TEXT,
-    ISBN TEXT,
+    ISBN INTEGER,
     Author_Editor TEXT,
     Edition_Volume TEXT,
     Place_Publisher TEXT,
