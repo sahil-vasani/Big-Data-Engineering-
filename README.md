@@ -1,180 +1,92 @@
-# 📚 Book Description Enrichment Pipeline
-### Big Data Engineering Mini Project
+# Big Data Engineering Project Workflow
 
-A comprehensive data engineering pipeline to enrich library book records with missing descriptions using multiple public data sources, followed by structured storage in SQLite and API-based access via FastAPI.
-
----
-
-## 📑 Table of Contents
-- [Overview](#-overview)
-- [Problem Statement](#-problem-statement)
-- [Data Sources](#-data-sources )
-- [Dataset Evolution](#-dataset-evolution )
-- [Final Data Schema](#-final-data-schema )
-- [Database Design](#-database-design )
-- [API Endpoints](#-api-endpoints-fastapi )
-- [Technologies Used](#-technologies-used )  
+## Project Overview
+This project is a **Book Library Data Pipeline** that fetches book descriptions from multiple sources, stores them in a SQLite database, and exposes the data through a FastAPI REST API.
 
 ---
 
-## 📌 Overview
-This project implements an **end-to-end data enrichment pipeline** that:
+## Architecture & Workflow
 
-- Starts from a raw library dataset with **no book descriptions**
-- Collects missing descriptions from **multiple external sources**
-- Applies **multi-stage fallback logic** to maximize coverage
-- Cleans and merges data into a **final unified dataset**
-- Stores enriched data in **SQLite**
-- Serves data using **FastAPI REST endpoints**
+### 1. **Data Collection & Enrichment** (`Data-Building/`)
 
-This project reflects **real-world data engineering challenges**, especially for **Indian publications**, where book descriptions are often unavailable from a single source.
+#### Input
+- **Source**: `dau_library_data.csv` - Raw library data with book metadata
+  - Columns: Acc_Date, Acc_No, Title, ISBN, Author_Editor, Edition_Volume, Place_Publisher, Year, Pages, Class_No
 
----
+#### Processing: `fetch_description.py`
+This script enriches the raw data by fetching book descriptions from external sources.
 
-## ❓ Problem Statement
-The original dataset (`dau_library.csv`) did not contain a book description column. Additionally:
+**Steps:**
+1. **Load & Clean Data**
+   - Read CSV file (encoding: latin1)
+   - Remove duplicate records based on: Title, ISBN, Author_Editor, Edition_Volume, Place_Publisher, Year, Pages, Class_No
+   - Initialize description column with "Not Found"
 
-- OpenLibrary provides **limited coverage** for Indian books
-- ISBN-based lookups frequently fail
-- A **single data source was insufficient**
+2. **Fetch from OpenLibrary** (First Priority)
+   - Iterate through books and clean ISBN numbers
+   - Query: `https://openlibrary.org/isbn/{ISBN}`
+   - Extract description from HTML element: `div.book-description div.read-more__content p`
+   - Rate limit: 1 second delay per request
+   - Fallback values: "ISBN Not Matched", "Description Not Available"
 
-To solve this, a **multi-source enrichment and fallback strategy** was designed.
+3. **Fetch from Google Books** (Second Priority)
+   - For books still missing descriptions, query Google Books
+   - Query: `https://books.google.com/books?vid=ISBN{ISBN}`
+   - Extract synopsis from `<div id="synopsis">`
+   - Rate limit: 0.2 second delay per request
 
----
+4. **Fetch from Google Books by Title + Author** (Third Priority)
+   - For books still without descriptions, use Title and Author search
+   - Build query string from: Title + Author_Editor
+   - Query: `https://books.google.com/books?q={title}+{author}`
+   - Extract synopsis from `<div id="synopsis">`
+   - Handles cases where ISBN is missing or invalid
+   - Rate limit: 0.2 second delay per request
+   - Additional fallback when ISBN-based search fails
 
-## 🧩 Data Sources
-- **Local Library Dataset (CSV)**
-- **OpenLibrary API** (ISBN-based)
-- **Google Books**
-  - HTML scraping
-  - API fallback
-  - Title + Author search
-
----
-
-## 🗂 Dataset Evolution
-
-### 1️⃣ Base Dataset (No Descriptions)
-**File:** `dau_library.csv`
-
-Contains:
-- Accession Date
-- Accession Number
-- Title
-- ISBN
-- Author / Editor
-- Edition / Volume
-- Publisher
-- Year
-- Pages
-- Classification Number
-
-❌ No description column
+#### Output
+- **File**: `Data/processed/dau_with_description.csv`
+- Contains all original columns + new `description` column
 
 ---
 
-### 2️⃣ ISBN-Based Description Fetch (OpenLibrary)
-**File:** `OpenLibrary_5000.csv`
+### 2. **Database Setup** (`Database/`)
 
-- Selected first **5,000 records**
-- Used ISBN to fetch descriptions from OpenLibrary API
+#### Script: `SQLite3.py`
+Loads the enriched CSV data into SQLite3 database.
 
-**Result:**
-- Partial success
-- Many `"Not Found"` values
-
----
-
-### 3️⃣ Google Books HTML Scraping (Large Scale)
-**File:** `HTML_tag_through_All_36000.csv`
-
-- Scraped descriptions using ISBN
-- Parsed HTML tags from Google Books
-- Covered ~36,000 records
-
-**Result:**
-- Higher coverage than OpenLibrary
-- Still some missing descriptions
-
----
-
-### 4️⃣ First Merge (Google Books + OpenLibrary)
-**File:** `Final_Merged_Descriptions.csv`
-
-**Merge Logic:**
-- Primary source → Google Books
-- Fallback source → OpenLibrary
-- If Google Books description is missing:
-  - Fill using OpenLibrary description
-
-**Result:**
-- Significant reduction in missing descriptions
+**Process:**
+1. Read: `Data/processed/dau_with_description.csv`
+2. Create SQLite table `books` with schema:
+   ```sql
+   Acc_Date (TEXT)
+   Acc_No (INTEGER, PRIMARY KEY)
+   Title (TEXT)
+   ISBN (INTEGER)
+   Author_Editor (TEXT)
+   Edition_Volume (TEXT)
+   Place_Publisher (TEXT)
+   Year (INTEGER)
+   Pages (TEXT)
+   Class_No (TEXT)
+   description (TEXT)
+   ```
+3. Insert all rows with "INSERT OR IGNORE" (prevents duplicates)
+4. Save to: `Database/db.sqlite3`
 
 ---
 
-### 5️⃣ Title + Author Based Fetch (Final Fallback)
-**File:** `Final_GoogleBooks_Descriptions.csv`
+### 3. **REST API** (`API/`)
 
-- Applied to remaining `"Not Found"` rows
-- Used **Title + Author** based search
-- Cleaned text (lowercase, punctuation removal)
+#### Script: `book_api.py`
+FastAPI server that provides HTTP endpoints to query the book database.
 
-**Result:**
-- Many additional descriptions recovered
+**Technology Stack:**
+- Framework: FastAPI
+- Server: Uvicorn
+- Database: SQLite3
 
----
-
-### 6️⃣ Final Clean Dataset
-**File:** `dau_with_description.csv`
-
-Merged:
-- `Final_Merged_Descriptions.csv`
-- `Final_GoogleBooks_Descriptions.csv`
-
-✅ Used for SQLite database insertion
-
----
-
-## 🧾 Final Data Schema
-
-| Column Name | Description |
-|------------|------------|
-| acc_no | Accession number |
-| title | Book title |
-| isbn | ISBN number |
-| author_editor | Author / Editor |
-| publisher | Publisher details |
-| year | Publication year |
-| pages | Number of pages |
-| class_no | Classification number |
-| description | Enriched book description |
-
----
-
-## 🗄 Database Design
-**Database:** `library.db`
-
-```sql
-CREATE TABLE books (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    acc_no TEXT,
-    title TEXT,
-    isbn TEXT,
-    author_editor TEXT,
-    publisher TEXT,
-    year INTEGER,
-    pages INTEGER,
-    class_no TEXT,
-    description TEXT
-);```
-
---- 
-```
-## 🚀 API Endpoints (FastAPI)
-
-The project exposes RESTful endpoints using **FastAPI** to access enriched book data stored in **SQLite**.
-
-### 📌 Available Endpoints
+**Endpoints:** 
 
 | No. | Method | Endpoint | Description |
 |----|--------|----------|-------------|
@@ -182,22 +94,114 @@ The project exposes RESTful endpoints using **FastAPI** to access enriched book 
 | 2 | GET | `/books` | Fetch a limited number of books using query parameter |
 | 3 | GET | `/search` | Search books by ISBN |
 | 4 | GET | `/books/{ISBN}` | Fetch a single book by ISBN |
-```
- 
-```
-## 🧰 Technologies Used
 
-- **Python** – Core programming language
-- **Pandas** – Data cleaning, merging, and preprocessing
-- **Requests** – API calls to OpenLibrary and Google Books
-- **BeautifulSoup** – HTML scraping from Google Books
-- **SQLite** – Lightweight relational database for storage
-- **FastAPI** – REST API development
-- **Uvicorn** – ASGI server for FastAPI 
+**Features:**
+- Returns books ordered by `Acc_Date DESC` (most recent first)
+- Only returns books that have descriptions (NOT NULL)
+- ISBN comparison strips hyphens for flexible matching
+- Returns 404 if book not found
 
 ---
 
- 
+## Full Data Pipeline Flow
 
+```
+dau_library_data.csv
+        ↓
+[Data-Building/fetch_description.py]
+  - Remove duplicates
+  - Fetch descriptions from OpenLibrary
+  - Fetch descriptions from Google Books
+        ↓
+dau_with_description.csv
+        ↓
+[Database/SQLite3.py]
+  - Load into SQLite3
+  - Create books table
+        ↓
+db.sqlite3
+        ↓
+[API/book_api.py]
+  - Start FastAPI server
+  - Expose REST endpoints
+        ↓
+HTTP Clients
+  - Query books via REST API
+```
 
+---
 
+## File Structure
+
+```
+Big-Data-Engineering-/
+├── API/
+│   ├── book_api.py           # FastAPI REST server
+│   └── __pycache__/
+├── Data/
+│   ├── raw_data/             # Original CSV files
+│   │   └── dau_library_data.csv
+│   └── processed/            # Enriched data
+│       └── dau_with_description.csv
+├── Data-Building/
+│   ├── fetch_description.py  # Data enrichment script
+│   └── load_data.ipynb       # Jupyter notebook for testing
+├── Database/
+│   ├── db.sqlite3            # SQLite database file
+│   └── SQLite3.py            # Database loader script
+├── logs/
+│   └── prompt.md
+├── requirements.txt          # Python dependencies
+└── README.md
+```
+
+---
+
+## Dependencies
+
+```
+requests          # HTTP requests for OpenLibrary & Google Books
+beautifulsoup4    # HTML parsing
+fastapi           # REST API framework
+pandas            # CSV data processing
+uvicorn           # ASGI server for FastAPI
+```
+
+Install: `pip install -r requirements.txt`
+
+---
+
+## How to Run
+
+### Step 1: Fetch Book Descriptions
+```bash
+cd Data-Building/
+python fetch_description.py
+# Output: Data/processed/dau_with_description.csv
+```
+
+### Step 2: Load Data into Database
+```bash
+cd Database/
+python SQLite3.py
+# Output: db.sqlite3
+```
+
+### Step 3: Start API Server
+```bash
+cd API/
+uvicorn book_api:app --reload --host 0.0.0.0 --port 8000
+# API available at: http://localhost:8000
+```
+
+### Step 4: Query the API
+```bash
+# Get 500 books with descriptions
+curl http://localhost:8000/books?limit=500
+
+# Get book by ISBN
+curl http://localhost:8000/book?isbn=978-0-13-110362-7
+
+# Get book by ISBN (path parameter)
+curl http://localhost:8000/books/978-0-13-110362-7
+```
