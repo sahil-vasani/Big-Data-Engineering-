@@ -1,9 +1,0 @@
-@echo off
-echo Installing dependencies...
-pip install -r requirements.txt
-
-echo Downloading NLTK data...
-python nltk_download.py
-
-echo Starting Server...
-uvicorn API.api:app --reload --host 127.0.0.1 --port 8000

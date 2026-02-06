@@ -1,54 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ardent Library | Intelligent Book Discovery</title>
+    <title>LibRec | Next-Gen Book Recommendations</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
 
-    <div class="main-container">
-        <!-- HERO -->
-        <header class="hero-section">
-            <h1 class="headline">Explore Your Next Chapters.</h1>
-            <p class="subheadline">An intelligent recommendation engine powered by semantic AI to help you find the perfect read based on your curiosity.</p>
-        </header>
-
-        <!-- SEARCH -->
-        <main class="search-card">
-            <nav class="tabs">
-                <div id="descTab" class="tab active" onclick="switchTab('desc')">Semantic Search</div>
-                <div id="isbnTab" class="tab" onclick="switchTab('isbn')">Exact ISBN</div>
-            </nav>
-
-            <div class="input-group">
-                <!-- Description Field (default) -->
-                <textarea id="descInput" 
-                    placeholder="E.g., 'A thriller set in Victorian London with a focus on forensic science' or 'Beginner guides to machine learning'"></textarea>
-                
-                <!-- ISBN Field (hidden by default via JS class logic) -->
-                <input id="isbnInput" type="text" placeholder="Enter 10 or 13-digit ISBN..." style="display: none;">
+    <header class="navbar">
+        <div class="nav-content">
+            <div class="logo">
+                <i class="fas fa-book-open"></i>
+                <span>LibRec</span>
             </div>
+            <nav class="nav-links">
+                <a href="#" class="active">Home</a>
+                <a href="#">Browse Genres</a>
+                <a href="#">My List</a>
+            </nav>
+        </div>
+    </header>
 
-            <button class="search-button" onclick="search()">Find Matches</button>
-        </main>
+    <div class="main-content">
+        <!-- GLOBAL SEARCH BAR -->
+        <div class="search-container">
+            <div class="search-bar">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="descInput" placeholder="Search by Title, Author, or describe a vibe...">
+                <div class="search-actions">
+                    <button id="isbnToggle" title="Search by ISBN">
+                        <i class="fas fa-barcode"></i>
+                    </button>
+                    <button class="primary-search-btn" onclick="search()">Search</button>
+                </div>
+            </div>
+            <!-- ISBN Field (Hidden by default) -->
+            <div id="isbnField" class="hidden-field">
+                <input type="text" id="isbnInput" placeholder="Enter ISBN-10 or ISBN-13...">
+            </div>
+        </div>
 
-        <!-- RESULTS SECTION -->
-        <section class="content-section">
-            <h2 id="sectionTitle" class="section-title">Suggested for You</h2>
-            <div id="results" class="book-list">
-                <!-- Cards injected here -->
-                <div class="no-results">Initializing your library...</div>
+        <div class="dashboard-grid">
+            <!-- HERO CARD (Featured or Top Match) -->
+            <section class="hero-section">
+                <h2 class="section-label">Featured Spotlight</h2>
+                <div id="heroCard" class="hero-card">
+                    <div class="hero-placeholder">Discover your next favorite book...</div>
+                </div>
+            </section>
+
+            <!-- SECONDARY RESULTS (GRID) -->
+            <section class="results-section">
+                <h2 id="resultsLabel" class="section-label">Discover Something New</h2>
+                <div id="results" class="book-grid">
+                    <!-- Results injected here -->
+                </div>
+            </section>
+        </div>
+
+        <!-- RECOMMENDED SLIDER -->
+        <section class="recommendations-row">
+            <h2 class="section-label">Recommended for You</h2>
+            <div id="recommendations" class="horizontal-scroll">
+                <!-- Random suggestions injected here -->
             </div>
         </section>
-
-        <footer style="margin-top: 8rem; text-align: center; color: var(--text-secondary); padding-bottom: 2rem;">
-            &copy; 2026 Ardent Library | Built with Semantic AI
-        </footer>
     </div>
 
-    <!-- Logic -->
+    <footer>
+        <p>&copy; 2026 LibRec Intelligent Discovery Engine</p>
+    </footer>
+
     <script src="/static/script.js"></script>
 </body>
+
 </html>
