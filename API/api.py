@@ -40,31 +40,26 @@ MODEL_NAME = "all-MiniLM-L6-v2"
 # =========================
 model = None    
 embeddings = None
-df = None
 
 # =========================
-# LOAD ONCE AT STARTUP
+# LAZY LOADING
 # =========================
-@app.on_event("startup")
-def load_assets():
+def get_model_and_embeddings():
     global model, embeddings
-
-    print("🚀 Loading model and embeddings...", flush=True)
-
-    try:
-        model = SentenceTransformer(
-            MODEL_NAME,
-            cache_folder="/tmp/hf_cache"
-        )
+    if model is None:
+        print("⏳ Lazy loading model...", flush=True)
+        model = SentenceTransformer(MODEL_NAME, cache_folder="/tmp/hf_cache")
         print("✅ Model loaded.", flush=True)
-
-        # Use mmap_mode to save memory (keeps file on disk, pages in as needed)
+    
+    if embeddings is None:
+        print("⏳ Lazy loading embeddings...", flush=True)
+        # Use mmap_mode to save memory
         embeddings = np.load(EMBEDDINGS_PATH, mmap_mode='r')
-        print("✅ Embeddings loaded (mmap).", flush=True)
+        print("✅ Embeddings loaded.", flush=True)
+    
+    return model, embeddings
 
-    except Exception as e:
-        print(f"❌ Error loading assets: {e}", flush=True)
-        raise e
+# REMOVED STARTUP EVENT
 
 
 # =========================
