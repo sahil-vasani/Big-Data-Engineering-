@@ -112,23 +112,28 @@ function renderBooks(books, title) {
     books.forEach((book, index) => {
         const img = book.image_url && book.image_url !== "nan"
             ? book.image_url
-            : "/static/placeholder_book.png"; // Fallback placeholder
+            : "https://via.placeholder.com/400x600?text=No+Cover+Available";
 
-        // Create random match % if not exists
-        const match = book.match_percent || Math.floor(82 + Math.random() * 15);
+        const bookUrl = book.book_url && book.book_url !== "nan"
+            ? book.book_url
+            : `https://www.google.com/search?q=${encodeURIComponent(book.Title + ' book')}`;
+
+        const match = book.match_percent || Math.floor(75 + Math.random() * 20);
 
         const card = document.createElement("div");
         card.className = "book-card";
-        card.style.animationDelay = `${index * 0.05}s`; // Staggered entrance
+        card.style.animationDelay = `${index * 0.08}s`;
 
         card.innerHTML = `
-            <div class="cover-wrapper">
-                <span class="match-badge">${match}% Match</span>
-                <img src="${img}" 
-                     class="book-cover" 
-                     alt="${book.Title}"
-                     onerror="this.src='https://via.placeholder.com/400x600?text=No+Cover+Available'">
-            </div>
+            <a href="${bookUrl}" target="_blank" style="text-decoration: none; color: inherit;">
+                <div class="cover-wrapper">
+                    <span class="match-badge">${match}% Match</span>
+                    <img src="${img}" 
+                         class="book-cover" 
+                         alt="${book.Title}"
+                         onerror="this.src='https://via.placeholder.com/400x600?text=No+Cover+Available'">
+                </div>
+            </a>
             <div class="card-content">
                 <div class="book-title clamp-2" title="${book.Title}">${book.Title}</div>
                 <div class="book-author clamp-1">${book.Author_Editor || "Unknown Author"}</div>
@@ -137,7 +142,6 @@ function renderBooks(books, title) {
         container.appendChild(card);
     });
 
-    // Scroll to results on search
     if (title !== "Suggested For You") {
         container.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
