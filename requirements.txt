@@ -5,3 +5,8 @@ scikit-learn
 numpy
 pandas
 sqlite-utils
+nltk
+torch
+gensim
+requests
+beautifulsoup4
