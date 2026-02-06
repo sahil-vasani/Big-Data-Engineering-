@@ -1,64 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Library Recommendation System</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- CSS -->
+    <title>Ardent Library | Intelligent Book Discovery</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
-
 <body>
 
     <div class="main-container">
-
         <!-- HERO -->
-        <section class="hero-section">
-            <h1 class="headline">Discover Your Next Great Read, Instantly.</h1>
+        <header class="hero-section">
+            <h1 class="headline">Explore Your Next Chapters.</h1>
+            <p class="subheadline">An intelligent recommendation engine powered by semantic AI to help you find the perfect read based on your curiosity.</p>
+        </header>
 
-            <div class="search-card">
+        <!-- SEARCH -->
+        <main class="search-card">
+            <nav class="tabs">
+                <div id="descTab" class="tab active" onclick="switchTab('desc')">Semantic Search</div>
+                <div id="isbnTab" class="tab" onclick="switchTab('isbn')">Exact ISBN</div>
+            </nav>
 
-                <!-- Tabs -->
-                <div class="tabs">
-                    <div id="isbnTab" class="tab" onclick="switchTab('isbn')">Search by ISBN</div>
-                    <div id="descTab" class="tab active" onclick="switchTab('desc')">Search by Description</div>
-                </div>
+            <div class="input-group">
+                <!-- Description Field (default) -->
+                <textarea id="descInput" 
+                    placeholder="E.g., 'A thriller set in Victorian London with a focus on forensic science' or 'Beginner guides to machine learning'"></textarea>
+                
+                <!-- ISBN Field (hidden by default via JS class logic) -->
+                <input id="isbnInput" type="text" placeholder="Enter 10 or 13-digit ISBN..." style="display: none;">
+            </div>
 
-                <!-- Inputs -->
-                <div class="input-group">
+            <button class="search-button" onclick="search()">Find Matches</button>
+        </main>
 
-                    <!-- ISBN -->
-                    <div class="isbn-input-container" id="isbnBox">
-                        <input id="isbnInput" type="text" class="isbn-input" placeholder="Enter ISBN...">
-                    </div>
-
-                    <!-- Description -->
-                    <textarea id="descInput" class="description-input"
-                        placeholder="Tell us about a plot, theme, or learning topic you love...">
-                </textarea>
-
-                </div>
-
-                <button class="search-button" onclick="search()">Find My Recommendations</button>
+        <!-- RESULTS SECTION -->
+        <section class="content-section">
+            <h2 id="sectionTitle" class="section-title">Suggested for You</h2>
+            <div id="results" class="book-list">
+                <!-- Cards injected here -->
+                <div class="no-results">Initializing your library...</div>
             </div>
         </section>
 
-        <!-- RESULTS -->
-        <section class="content-section">
-            <h2 class="section-title">Curated for You</h2>
-            <div id="results" class="book-list"></div>
-        </section>
-
+        <footer style="margin-top: 8rem; text-align: center; color: var(--text-secondary); padding-bottom: 2rem;">
+            &copy; 2026 Ardent Library | Built with Semantic AI
+        </footer>
     </div>
 
+    <!-- Logic -->
     <script src="/static/script.js"></script>
 </body>
-
 </html>

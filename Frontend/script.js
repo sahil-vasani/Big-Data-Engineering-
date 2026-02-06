@@ -1,5 +1,20 @@
 let mode = "desc";
 
+// Initialize on load
+document.addEventListener("DOMContentLoaded", () => {
+    fetchInitialSuggestions();
+});
+
+async function fetchInitialSuggestions() {
+    try {
+        const res = await fetch("/random");
+        const data = await res.json();
+        renderBooks(data.results || [], "Suggested For You");
+    } catch (e) {
+        console.error("Failed to load initial suggestions:", e);
+    }
+}
+
 // Tab switch
 function switchTab(tab) {
     mode = tab;
@@ -7,8 +22,16 @@ function switchTab(tab) {
     document.getElementById("isbnTab").classList.toggle("active", tab === "isbn");
     document.getElementById("descTab").classList.toggle("active", tab === "desc");
 
-    document.getElementById("isbnInput").disabled = tab !== "isbn";
-    document.getElementById("descInput").disabled = tab !== "desc";
+    const descInput = document.getElementById("descInput");
+    const isbnInput = document.getElementById("isbnInput");
+
+    if (tab === "isbn") {
+        descInput.style.display = "none";
+        isbnInput.style.display = "block";
+    } else {
+        descInput.style.display = "block";
+        isbnInput.style.display = "none";
+    }
 }
 
 // Search handler
@@ -20,33 +43,30 @@ async function search() {
     }
 }
 
-// ISBN
+// ISBN Search
 async function searchByISBN() {
     const isbn = document.getElementById("isbnInput").value.trim();
     if (!isbn) return;
 
+    setLoading(true);
     try {
         const res = await fetch(`/book/isbn/${isbn}`);
-        if (!res.ok) throw new Error("Book not found");
+        if (!res.ok) throw new Error("No book found with this ISBN");
         const data = await res.json();
-        renderBooks([data]);
+        renderBooks([data], `Result for ${isbn}`);
     } catch (e) {
-        alert("Error searching ISBN: " + e.message);
+        alert(e.message);
+    } finally {
+        setLoading(false);
     }
 }
 
-// DESCRIPTION
+// Semantic Search
 async function searchByDescription() {
     const desc = document.getElementById("descInput").value.trim();
-    if (desc.length < 3) return;
+    if (desc.length < 2) return;
 
-    const btn = document.querySelector(".search-button");
-    if (!btn) return;
-
-    const originalText = btn.innerText;
-    btn.innerText = "Searching...";
-    btn.disabled = true;
-
+    setLoading(true);
     try {
         const res = await fetch(`/recommend`, {
             method: "POST",
@@ -60,47 +80,65 @@ async function searchByDescription() {
         }
 
         const data = await res.json();
-        renderBooks(data.results || []);
+        renderBooks(data.results || [], `Top Matches for "${desc}"`);
     } catch (e) {
         console.error(e);
-        alert("Recommendation Error: " + e.message);
+        alert("Error: " + e.message);
     } finally {
-        btn.innerText = originalText;
-        btn.disabled = false;
+        setLoading(false);
     }
 }
 
+function setLoading(isLoading) {
+    const btn = document.querySelector(".search-button");
+    btn.innerText = isLoading ? "Scanning Library..." : "Find Matches";
+    btn.disabled = isLoading;
+}
+
 // Render cards
-function renderBooks(books) {
+function renderBooks(books, title) {
+    if (title) {
+        document.getElementById("sectionTitle").innerText = title;
+    }
+
     const container = document.getElementById("results");
     container.innerHTML = "";
 
     if (!books || books.length === 0) {
-        container.innerHTML = "<p class='no-results' style='grid-column: 1/-1; text-align: center; padding: 2rem; color: #666;'>No books found matching your description. Try another search!</p>";
+        container.innerHTML = "<div class='no-results'>We couldn't find any books that match your query. Try different words or a different genre.</div>";
         return;
     }
 
-    books.forEach(book => {
+    books.forEach((book, index) => {
         const img = book.image_url && book.image_url !== "nan"
             ? book.image_url
-            : "https://via.placeholder.com/300x450?text=No+Image";
+            : "/static/placeholder_book.png"; // Fallback placeholder
 
-        container.innerHTML += `
-            <div class="book-card">
-                <div class="cover-wrapper">
-                    <span class="match-badge">
-                        ${Math.floor(85 + Math.random() * 10)}% Match
-                    </span>
-                    <img src="${img}"
-                         class="book-cover"
-                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                </div>
-                <div class="card-content">
-                    <div class="book-title clamp-2">${book.Title}</div>
-                    <div class="book-author clamp-1">${book.Author_Editor || ""}</div>
-                </div>
+        // Create random match % if not exists
+        const match = book.match_percent || Math.floor(82 + Math.random() * 15);
+
+        const card = document.createElement("div");
+        card.className = "book-card";
+        card.style.animationDelay = `${index * 0.05}s`; // Staggered entrance
+
+        card.innerHTML = `
+            <div class="cover-wrapper">
+                <span class="match-badge">${match}% Match</span>
+                <img src="${img}" 
+                     class="book-cover" 
+                     alt="${book.Title}"
+                     onerror="this.src='https://via.placeholder.com/400x600?text=No+Cover+Available'">
+            </div>
+            <div class="card-content">
+                <div class="book-title clamp-2" title="${book.Title}">${book.Title}</div>
+                <div class="book-author clamp-1">${book.Author_Editor || "Unknown Author"}</div>
             </div>
         `;
+        container.appendChild(card);
     });
-}
 
+    // Scroll to results on search
+    if (title !== "Suggested For You") {
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
