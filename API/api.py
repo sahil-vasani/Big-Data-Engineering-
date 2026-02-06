@@ -147,5 +147,7 @@ def recommend_books(request: DescriptionRequest):
         return {"query": text, "results": results}
 
     except Exception as e:
-        print(f"❌ ERROR: {e}", flush=True)
+        import traceback
+        error_msg = traceback.format_exc()
+        print(f"❌ ERROR: {e}\n{error_msg}", flush=True)
         raise HTTPException(status_code=500, detail="Internal recommendation error")
