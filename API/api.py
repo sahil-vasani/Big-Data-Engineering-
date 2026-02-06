@@ -125,9 +125,12 @@ def recommend_books(request: DescriptionRequest):
         else:
             topic, k = parsed, 5
 
+        # Ensure model is loaded
+        model_instance, embeddings_instance = get_model_and_embeddings()
+
         # Encode query
-        query_vec = model.encode([topic])
-        similarities = cosine_similarity(query_vec, embeddings)
+        query_vec = model_instance.encode([topic])
+        similarities = cosine_similarity(query_vec, embeddings_instance)
 
         # Get top k indices
         k = min(k, similarities.shape[1])
