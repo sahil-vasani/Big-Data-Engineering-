@@ -1,9 +1,11 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.1.0+cpu
+torch==2.4.1+cpu
 numpy<2.0.0
+transformers<5.0.0
+sentence-transformers<4.0.0
+scikit-learn
+scipy
 fastapi
 uvicorn
-sentence-transformers
-scikit-learn
-nltk
 gunicorn
+nltk

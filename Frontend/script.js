@@ -22,24 +22,49 @@ async function search() {
 
 // ISBN
 async function searchByISBN() {
-    const isbn = document.getElementById("isbnInput").value;
-    const res = await fetch(`/book/isbn/${isbn}`);
-    const data = await res.json();
-    renderBooks([data]);
+    const isbn = document.getElementById("isbnInput").value.trim();
+    if (!isbn) return;
+
+    try {
+        const res = await fetch(`/book/isbn/${isbn}`);
+        if (!res.ok) throw new Error("Book not found");
+        const data = await res.json();
+        renderBooks([data]);
+    } catch (e) {
+        alert("Error searching ISBN: " + e.message);
+    }
 }
 
 // DESCRIPTION
 async function searchByDescription() {
-    const desc = document.getElementById("descInput").value;
+    const desc = document.getElementById("descInput").value.trim();
+    if (desc.length < 3) return;
 
-    const res = await fetch(`/recommend`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description: desc })
-    });
+    const btn = document.querySelector(".btn-search");
+    btn.innerText = "Searching...";
+    btn.disabled = true;
 
-    const data = await res.json();
-    renderBooks(data.results);
+    try {
+        const res = await fetch(`/recommend`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ description: desc })
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || "Search failed");
+        }
+
+        const data = await res.json();
+        renderBooks(data.results);
+    } catch (e) {
+        console.error(e);
+        alert("Recommendation Error: " + e.message);
+    } finally {
+        btn.innerText = "Search & Recommend";
+        btn.disabled = false;
+    }
 }
 
 // Render cards
