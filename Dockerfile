@@ -1,17 +1,31 @@
-FROM python:3.10-slim
+# ---- Base image (VERY IMPORTANT) ----
+FROM python:3.11-slim
 
-WORKDIR /app
-
+# ---- Prevent huge cache ----
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV TRANSFORMERS_CACHE=/tmp/hf_cache
+ENV HF_HOME=/tmp/hf_home
 
-RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
+# ---- System dependencies ----
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
+# ---- Working directory ----
+WORKDIR /app
+
+# ---- Copy only requirements first (layer caching) ----
 COPY requirements.txt .
+
+# ---- Install Python deps (NO CACHE) ----
 RUN pip install --no-cache-dir -r requirements.txt
 
+# ---- Copy project (after deps) ----
 COPY . .
 
+# ---- Expose port ----
 EXPOSE 8000
 
+# ---- Start FastAPI ----
 CMD ["uvicorn", "API.api:app", "--host", "0.0.0.0", "--port", "8000"]

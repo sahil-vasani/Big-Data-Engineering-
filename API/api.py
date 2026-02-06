@@ -38,7 +38,7 @@ MODEL_NAME = "all-MiniLM-L6-v2"
 # =========================
 # GLOBAL OBJECTS
 # =========================
-model = None
+model = None    
 embeddings = None
 df = None
 
@@ -51,13 +51,18 @@ def load_assets():
 
     print("🚀 Loading model, embeddings, and metadata...")
 
-    model = SentenceTransformer(MODEL_NAME)
+    model = SentenceTransformer(
+        MODEL_NAME,
+        cache_folder="/tmp/hf_cache"
+    )
+
     embeddings = np.load(EMBEDDINGS_PATH)
 
     with open(METADATA_PATH, "rb") as f:
         df = pickle.load(f)
 
     print("✅ Assets loaded successfully (no recomputation)")
+
 
 # =========================
 # SERVE FRONTEND
