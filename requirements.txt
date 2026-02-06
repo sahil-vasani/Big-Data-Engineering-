@@ -5,6 +5,13 @@ pandas
 uvicorn
 tqdm
 urllib3
+torch
+gensim
+sentence-transformers
+scikit-learn
+nltk
+numpy
+
  
 
  

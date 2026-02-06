@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 import sqlite3
@@ -11,16 +12,14 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Reuse query parser from your recommender file
+# Reuse parser
 from Embedding.book_recommender import parse_query
 
-
 # =========================
-# APP INITIALIZATION
+# APP INIT
 # =========================
 app = FastAPI(title="Book Recommendation API")
 
-# Allow frontend access (safe for local/dev)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,18 +27,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve frontend
-app.mount("/static", StaticFiles(directory="Frontend"), name="static")
-
-
 # =========================
-# PATH CONFIG
+# PATH CONFIG (RELATIVE)
 # =========================
-DB_PATH = r"D:\COLLAGE\DAIICT\2 - SEM\BDE\Project\Big-Data-Engineering-\Database\books.db"
-EMBEDDINGS_PATH = r"D:\COLLAGE\DAIICT\2 - SEM\BDE\Project\Big-Data-Engineering-\Embedding\book_embeddings.npy"
-METADATA_PATH = r"D:\COLLAGE\DAIICT\2 - SEM\BDE\Project\Big-Data-Engineering-\Embedding\books_metadata.pkl"
+DB_PATH = "Database/books.db"
+EMBEDDINGS_PATH = "Embedding/book_embeddings.npy"
+METADATA_PATH = "Embedding/books_metadata.pkl"
 MODEL_NAME = "all-MiniLM-L6-v2"
-
 
 # =========================
 # GLOBAL OBJECTS
@@ -48,34 +42,31 @@ model = None
 embeddings = None
 df = None
 
-
 # =========================
-# LOAD EVERYTHING ONCE
+# LOAD ONCE AT STARTUP
 # =========================
-from fastapi.responses import FileResponse
-
-@app.get("/")
-def serve_frontend():
-    return FileResponse("Frontend/index.html")
- 
 @app.on_event("startup")
 def load_assets():
     global model, embeddings, df
 
     print("🚀 Loading model, embeddings, and metadata...")
 
-    # Load transformer model (NO training)
     model = SentenceTransformer(MODEL_NAME)
-
-    # Load saved embeddings
     embeddings = np.load(EMBEDDINGS_PATH)
 
-    # Load metadata dataframe
     with open(METADATA_PATH, "rb") as f:
         df = pickle.load(f)
 
     print("✅ Assets loaded successfully (no recomputation)")
 
+# =========================
+# SERVE FRONTEND
+# =========================
+app.mount("/static", StaticFiles(directory="Frontend"), name="static")
+
+@app.get("/")
+def serve_frontend():
+    return FileResponse("Frontend/index.html")
 
 # =========================
 # DATABASE UTILS
@@ -85,27 +76,21 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-
 # =========================
 # REQUEST SCHEMA
 # =========================
 class DescriptionRequest(BaseModel):
     description: str
 
-
 # =========================
-# ENDPOINT 1: FETCH BY ISBN
+# ENDPOINT 1: ISBN SEARCH
 # =========================
 @app.get("/book/isbn/{isbn}")
 def get_book_by_isbn(isbn: str):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT * FROM books WHERE ISBN = ?",
-        (isbn,)
-    )
-
+    cursor.execute("SELECT * FROM books WHERE ISBN = ?", (isbn,))
     row = cursor.fetchone()
     conn.close()
 
@@ -114,9 +99,8 @@ def get_book_by_isbn(isbn: str):
 
     return dict(row)
 
-
 # =========================
-# ENDPOINT 2: RECOMMEND BY DESCRIPTION (ML)
+# ENDPOINT 2: ML RECOMMEND
 # =========================
 @app.post("/recommend")
 def recommend_books(request: DescriptionRequest):
@@ -124,19 +108,14 @@ def recommend_books(request: DescriptionRequest):
         text = request.description.strip()
 
         if len(text) < 3:
-            raise HTTPException(
-                status_code=400,
-                detail="Description too short"
-            )
+            raise HTTPException(status_code=400, detail="Description too short")
 
         parsed = parse_query(text)
 
         if isinstance(parsed, tuple):
-            topic = parsed[0]
-            k = parsed[1] if len(parsed) > 1 else 5
+            topic, k = parsed
         else:
-            topic = parsed
-            k = 5
+            topic, k = parsed, 5
 
         query_vec = model.encode([topic])
         similarities = cosine_similarity(query_vec, embeddings)
@@ -146,7 +125,6 @@ def recommend_books(request: DescriptionRequest):
 
         results_df = df.iloc[top_indices]
 
-        # 🔥 CRITICAL FIX: force Python-native types
         results = []
         for _, row in results_df.iterrows():
             results.append({
@@ -166,7 +144,4 @@ def recommend_books(request: DescriptionRequest):
 
     except Exception as e:
         print("❌ ERROR IN /recommend:", repr(e))
-        raise HTTPException(
-            status_code=500,
-            detail="Internal recommendation error"
-        )
+        raise HTTPException(status_code=500, detail="Internal recommendation error")
