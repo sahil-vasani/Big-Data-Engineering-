@@ -3,6 +3,8 @@ beautifulsoup4
 fastapi
 pandas
 uvicorn
+tqdm
+urllib3
  
 
  

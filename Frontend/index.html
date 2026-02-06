@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Recommendation System</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <div class="main-container">
+
+        <!-- HERO -->
+        <section class="hero-section">
+            <h1 class="headline">Discover Your Next Great Read, Instantly.</h1>
+
+            <div class="search-card">
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <div id="isbnTab" class="tab" onclick="switchTab('isbn')">Search by ISBN</div>
+                    <div id="descTab" class="tab active" onclick="switchTab('desc')">Search by Description</div>
+                </div>
+
+                <!-- Inputs -->
+                <div class="input-group">
+
+                    <!-- ISBN -->
+                    <div class="isbn-input-container" id="isbnBox">
+                        <input id="isbnInput" type="text" class="isbn-input" placeholder="Enter ISBN...">
+                    </div>
+
+                    <!-- Description -->
+                    <textarea id="descInput" class="description-input"
+                        placeholder="Tell us about a plot, theme, or learning topic you love...">
+                </textarea>
+
+                </div>
+
+                <button class="search-button" onclick="search()">Find My Recommendations</button>
+            </div>
+        </section>
+
+        <!-- RESULTS -->
+        <section class="content-section">
+            <h2 class="section-title">Curated for You</h2>
+            <div id="results" class="book-list"></div>
+        </section>
+
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
