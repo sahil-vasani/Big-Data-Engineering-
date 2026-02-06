@@ -10,3 +10,4 @@ torch
 gensim
 requests
 beautifulsoup4
+gunicorn

@@ -49,19 +49,20 @@ df = None
 def load_assets():
     global model, embeddings, df
 
-    print("🚀 Loading model, embeddings, and metadata...")
+    print("🚀 Loading model, embeddings, and metadata...", flush=True)
 
     model = SentenceTransformer(
         MODEL_NAME,
         cache_folder="/tmp/hf_cache"
     )
 
-    embeddings = np.load(EMBEDDINGS_PATH)
+    # Use mmap_mode to save memory (keeps file on disk, pages in as needed)
+    embeddings = np.load(EMBEDDINGS_PATH, mmap_mode='r')
 
     with open(METADATA_PATH, "rb") as f:
         df = pickle.load(f)
 
-    print("✅ Assets loaded successfully (no recomputation)")
+    print("✅ Assets loaded successfully (no recomputation)", flush=True)
 
 
 # =========================
