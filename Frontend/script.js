@@ -127,7 +127,6 @@ function renderBooks(books, title) {
         card.innerHTML = `
             <a href="${bookUrl}" target="_blank" style="text-decoration: none; color: inherit;">
                 <div class="cover-wrapper">
-                    <span class="match-badge">${match}% Match</span>
                     <img src="${img}" 
                          class="book-cover" 
                          alt="${book.Title}"

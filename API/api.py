@@ -163,12 +163,7 @@ def recommend_books(request: DescriptionRequest):
         results = []
         for rid in row_ids:
             if rid in row_map:
-                book = row_map[rid]
-                # Calculate match percent for UI
-                idx_local = rid - 1
-                if idx_local < len(similarities):
-                    book["match_percent"] = int(similarities[idx_local] * 100)
-                results.append(book)
+                results.append(row_map[rid])
 
         return {"query": topic, "results": results}
 
