@@ -1,47 +1,59 @@
 let mode = "desc";
 
+// Initialize on load
 document.addEventListener("DOMContentLoaded", () => {
     fetchInitialSuggestions();
-    setupISBNToggle();
 });
-
-function setupISBNToggle() {
-    const btn = document.getElementById("isbnToggle");
-    const field = document.getElementById("isbnField");
-    btn.addEventListener("click", () => {
-        field.classList.toggle("active");
-        mode = field.classList.contains("active") ? "isbn" : "desc";
-    });
-}
 
 async function fetchInitialSuggestions() {
     try {
         const res = await fetch("/random");
         const data = await res.json();
-        renderRecommendations(data.results || []);
+        renderBooks(data.results || [], "Suggested For You");
     } catch (e) {
-        console.error("Failed suggestions:", e);
+        console.error("Failed to load initial suggestions:", e);
     }
 }
 
+// Tab switch
+function switchTab(tab) {
+    mode = tab;
+
+    document.getElementById("isbnTab").classList.toggle("active", tab === "isbn");
+    document.getElementById("descTab").classList.toggle("active", tab === "desc");
+
+    const descInput = document.getElementById("descInput");
+    const isbnInput = document.getElementById("isbnInput");
+
+    if (tab === "isbn") {
+        descInput.style.display = "none";
+        isbnInput.style.display = "block";
+    } else {
+        descInput.style.display = "block";
+        isbnInput.style.display = "none";
+    }
+}
+
+// Search handler
 async function search() {
-    const desc = document.getElementById("descInput").value.trim();
-    const isbn = document.getElementById("isbnInput").value.trim();
-
-    if (mode === "isbn" && isbn) {
-        searchByISBN(isbn);
-    } else if (desc) {
-        searchByDescription(desc);
+    if (mode === "isbn") {
+        searchByISBN();
+    } else {
+        searchByDescription();
     }
 }
 
-async function searchByISBN(isbn) {
+// ISBN Search
+async function searchByISBN() {
+    const isbn = document.getElementById("isbnInput").value.trim();
+    if (!isbn) return;
+
     setLoading(true);
     try {
         const res = await fetch(`/book/isbn/${isbn}`);
-        if (!res.ok) throw new Error("No book found");
+        if (!res.ok) throw new Error("No book found with this ISBN");
         const data = await res.json();
-        renderMainResults([data], "Search Results");
+        renderBooks([data], `Result for ${isbn}`);
     } catch (e) {
         alert(e.message);
     } finally {
@@ -49,7 +61,11 @@ async function searchByISBN(isbn) {
     }
 }
 
-async function searchByDescription(desc) {
+// Semantic Search
+async function searchByDescription() {
+    const desc = document.getElementById("descInput").value.trim();
+    if (desc.length < 2) return;
+
     setLoading(true);
     try {
         const res = await fetch(`/recommend`, {
@@ -57,8 +73,14 @@ async function searchByDescription(desc) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ description: desc })
         });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || "Search failed");
+        }
+
         const data = await res.json();
-        renderMainResults(data.results || [], `Results for "${desc}"`);
+        renderBooks(data.results || [], `Top Matches for "${desc}"`);
     } catch (e) {
         console.error(e);
         alert("Error: " + e.message);
@@ -68,73 +90,56 @@ async function searchByDescription(desc) {
 }
 
 function setLoading(isLoading) {
-    const btn = document.querySelector(".primary-search-btn");
-    btn.innerText = isLoading ? "Searching..." : "Search";
+    const btn = document.querySelector(".search-button");
+    btn.innerText = isLoading ? "Scanning Library..." : "Find Matches";
     btn.disabled = isLoading;
 }
 
-function renderMainResults(books, label) {
-    document.getElementById("resultsLabel").innerText = label;
-    const heroContainer = document.getElementById("heroCard");
-    const gridContainer = document.getElementById("results");
+// Render cards
+function renderBooks(books, title) {
+    if (title) {
+        document.getElementById("sectionTitle").innerText = title;
+    }
 
-    heroContainer.innerHTML = "";
-    gridContainer.innerHTML = "";
+    const container = document.getElementById("results");
+    container.innerHTML = "";
 
     if (!books || books.length === 0) {
-        heroContainer.innerHTML = "<p>No matches found.</p>";
+        container.innerHTML = "<div class='no-results'>We couldn't find any books that match your query. Try different words or a different genre.</div>";
         return;
     }
 
-    // First book is Hero
-    const hero = books[0];
-    const heroImg = hero.image_url && hero.image_url !== "nan" ? hero.image_url : "https://via.placeholder.com/200x300";
-    const heroLink = hero.book_url && hero.book_url !== "nan" ? hero.book_url : "#";
+    books.forEach((book, index) => {
+        const img = book.image_url && book.image_url !== "nan"
+            ? book.image_url
+            : "https://via.placeholder.com/400x600?text=No+Cover+Available";
 
-    heroContainer.innerHTML = `
-        <img src="${heroImg}" class="book-img" alt="${hero.Title}" onerror="this.src='https://via.placeholder.com/200x300'">
-        <div class="details">
-            <h3>${hero.Title}</h3>
-            <p>${hero.Author_Editor || "Unknown Author"}</p>
-            <a href="${heroLink}" target="_blank" class="hero-details-btn">View Details</a>
-        </div>
-    `;
+        const bookUrl = book.book_url && book.book_url !== "nan"
+            ? book.book_url
+            : `https://www.google.com/search?q=${encodeURIComponent(book.Title + ' book')}`;
 
-    // Remaining are grid
-    books.slice(1, 7).forEach(book => {
-        const img = book.image_url && book.image_url !== "nan" ? book.image_url : "https://via.placeholder.com/150x225";
-        const link = book.book_url && book.book_url !== "nan" ? book.book_url : "#";
+        const card = document.createElement("div");
+        card.className = "book-card";
+        card.style.animationDelay = `${index * 0.08}s`;
 
-        const card = document.createElement("a");
-        card.href = link;
-        card.target = "_blank";
-        card.style.textDecoration = "none";
-        card.className = "book-card-mini";
         card.innerHTML = `
-            <img src="${img}" class="mini-cover" onerror="this.src='https://via.placeholder.com/150x225'">
-            <div class="mini-info">
-                <div class="mini-title">${book.Title}</div>
+            <a href="${bookUrl}" target="_blank" style="text-decoration: none; color: inherit;">
+                <div class="cover-wrapper">
+                    <img src="${img}" 
+                         class="book-cover" 
+                         alt="${book.Title}"
+                         onerror="this.src='https://via.placeholder.com/400x600?text=No+Cover+Available'">
+                </div>
+            </a>
+            <div class="card-content">
+                <div class="book-title clamp-2" title="${book.Title}">${book.Title}</div>
+                <div class="book-author clamp-1">${book.Author_Editor || "Unknown Author"}</div>
             </div>
         `;
-        gridContainer.appendChild(card);
-    });
-
-    document.querySelector(".dashboard-grid").scrollIntoView({ behavior: 'smooth' });
-}
-
-function renderRecommendations(books) {
-    const container = document.getElementById("recommendations");
-    container.innerHTML = "";
-
-    books.forEach(book => {
-        const img = book.image_url && book.image_url !== "nan" ? book.image_url : "https://via.placeholder.com/150x225";
-        const link = book.book_url && book.book_url !== "nan" ? book.book_url : "#";
-
-        const card = document.createElement("a");
-        card.href = link;
-        card.target = "_blank";
-        card.className = "scroll-card";
-        card.innerHTML = `<img src="${img}" class="scroll-img" alt="${book.Title}" onerror="this.src='https://via.placeholder.com/150x225'">`;
         container.appendChild(card);
     });
+
+    if (title !== "Suggested For You") {
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
