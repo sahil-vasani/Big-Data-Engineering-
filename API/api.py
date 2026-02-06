@@ -138,10 +138,12 @@ def recommend_books(request: DescriptionRequest):
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         placeholders = ",".join("?" for _ in row_ids)
-        rows = conn.execute(f"SELECT *, rowid FROM books WHERE rowid IN ({placeholders})", row_ids).fetchall()
+        # Using rowid as an alias to be safe
+        query = f"SELECT *, rowid AS r_id FROM books WHERE rowid IN ({placeholders})"
+        rows = conn.execute(query, row_ids).fetchall()
         conn.close()
 
-        row_map = {row["rowid"]: dict(row) for row in rows}
+        row_map = {row["r_id"]: dict(row) for row in rows}
         results = [row_map[idx] for idx in row_ids if idx in row_map]
 
         return {"query": text, "results": results}
