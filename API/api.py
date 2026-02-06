@@ -47,22 +47,24 @@ df = None
 # =========================
 @app.on_event("startup")
 def load_assets():
-    global model, embeddings, df
+    global model, embeddings
 
-    print("🚀 Loading model, embeddings, and metadata...", flush=True)
+    print("🚀 Loading model and embeddings...", flush=True)
 
-    model = SentenceTransformer(
-        MODEL_NAME,
-        cache_folder="/tmp/hf_cache"
-    )
+    try:
+        model = SentenceTransformer(
+            MODEL_NAME,
+            cache_folder="/tmp/hf_cache"
+        )
+        print("✅ Model loaded.", flush=True)
 
-    # Use mmap_mode to save memory (keeps file on disk, pages in as needed)
-    embeddings = np.load(EMBEDDINGS_PATH, mmap_mode='r')
+        # Use mmap_mode to save memory (keeps file on disk, pages in as needed)
+        embeddings = np.load(EMBEDDINGS_PATH, mmap_mode='r')
+        print("✅ Embeddings loaded (mmap).", flush=True)
 
-    with open(METADATA_PATH, "rb") as f:
-        df = pickle.load(f)
-
-    print("✅ Assets loaded successfully (no recomputation)", flush=True)
+    except Exception as e:
+        print(f"❌ Error loading assets: {e}", flush=True)
+        raise e
 
 
 # =========================
@@ -123,25 +125,43 @@ def recommend_books(request: DescriptionRequest):
         else:
             topic, k = parsed, 5
 
+        # Encode query
         query_vec = model.encode([topic])
         similarities = cosine_similarity(query_vec, embeddings)
 
+        # Get top k indices
         k = min(k, similarities.shape[1])
         top_indices = similarities[0].argsort()[-k:][::-1]
 
-        results_df = df.iloc[top_indices]
+        # Convert 0-based numpy indices to 1-based SQLite rowids
+        # Assumption: DB rows were inserted in same order as embeddings (create_db.py follows csv vs numpy save)
+        row_ids = [int(i) + 1 for i in top_indices]
+        
+        # Fetch from DB
+        conn = get_db_connection()
+        placeholders = ",".join("?" for _ in row_ids)
+        query = f"SELECT *, rowid FROM books WHERE rowid IN ({placeholders})"
+        
+        cursor = conn.execute(query, row_ids)
+        rows = cursor.fetchall()
+        conn.close()
 
+        # Create a map for sorting
+        row_map = {row["rowid"]: dict(row) for row in rows}
+        
         results = []
-        for _, row in results_df.iterrows():
-            results.append({
-                "Acc_No": int(row["Acc_No"]) if not pd.isna(row["Acc_No"]) else None,
-                "Title": str(row["Title"]),
-                "Author_Editor": str(row["Author_Editor"]),
-                "ISBN": str(row["ISBN"]),
-                "Year": int(row["Year"]) if not pd.isna(row["Year"]) else None,
-                "description": str(row["description"]),
-                "image_url": str(row["image_url"]) if "image_url" in row else None
-            })
+        for idx in row_ids:
+            if idx in row_map:
+                row = row_map[idx]
+                results.append({
+                    "Acc_No": row["Acc_No"],
+                    "Title": row["Title"],
+                    "Author_Editor": row["Author_Editor"],
+                    "ISBN": str(row["ISBN"]),
+                    "Year": row["Year"],
+                    "description": row["description"],
+                    "image_url": row["image_url"]
+                })
 
         return {
             "query": text,
@@ -149,5 +169,5 @@ def recommend_books(request: DescriptionRequest):
         }
 
     except Exception as e:
-        print("❌ ERROR IN /recommend:", repr(e))
+        print("❌ ERROR IN /recommend:", repr(e), flush=True)
         raise HTTPException(status_code=500, detail="Internal recommendation error")
