@@ -150,4 +150,4 @@ def recommend_books(request: DescriptionRequest):
         import traceback
         error_msg = traceback.format_exc()
         print(f"❌ ERROR: {e}\n{error_msg}", flush=True)
-        raise HTTPException(status_code=500, detail="Internal recommendation error")
+        raise HTTPException(status_code=500, detail=str(e))
