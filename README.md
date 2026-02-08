@@ -343,6 +343,6 @@ Specialist in Data Engineering, Vector Databases, and Cloud AI deployment strate
 --- 
 
 ## 🚀 Public URL :
-URL : [dummy-production-0b7e.up.railway.app](https://web-production-7db7.up.railway.app/)
+URL : https://web-production-7db7.up.railway.app/
 
 ---
