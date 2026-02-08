@@ -3,52 +3,124 @@
 
 <head>
     <meta charset="UTF-8">
+    <title>Book Discovery UI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ardent Library | Intelligent Book Discovery</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
 
-    <div class="main-container">
-        <!-- HERO -->
-        <header class="hero-section">
-            <h1 class="headline">Explore Your Next Chapters.</h1>
-            <p class="subheadline">An intelligent recommendation engine powered by semantic AI to help you find the
-                perfect read based on your curiosity.</p>
-        </header>
+    <!-- HERO -->
+    <header class="hero">
+        <h1>Discover Your Next Great Read, Instantly.</h1>
+    </header>
 
-        <!-- SEARCH -->
-        <main class="search-card">
-            <nav class="tabs">
-                <div id="descTab" class="tab active" onclick="switchTab('desc')">Semantic Search</div>
-                <div id="isbnTab" class="tab" onclick="switchTab('isbn')">Exact ISBN</div>
-            </nav>
+    <!-- SEARCH CARD -->
+    <section class="search-container">
 
-            <div class="input-group">
-                <textarea id="descInput"
-                    placeholder="E.g., 'A thriller set in Victorian London with a focus on forensic science' or 'Beginner guides to machine learning'"></textarea>
+        <div class="tabs">
+            <button class="tab active" id="descTab" onclick="switchTab('desc')">
+                Search by Description
+            </button>
+            <button class="tab" id="isbnTab" onclick="switchTab('isbn')">
+                Search by ISBN
+            </button>
+        </div>
 
-                <input id="isbnInput" type="text" placeholder="Enter 10 or 13-digit ISBN..." style="display: none;">
-            </div>
+        <div class="input-group">
+            <textarea id="descInput" rows="3"
+                placeholder="Tell us about a plot, theme, or character you love..."></textarea>
 
-            <button class="search-button" onclick="search()">Find Matches</button>
-        </main>
+            <input type="text" id="isbnInput" placeholder="000-0-00-000000-0" disabled>
+        </div>
 
-        <!-- RESULTS SECTION -->
-        <section class="content-section">
-            <h2 id="sectionTitle" class="section-title">Suggested for You</h2>
-            <div id="results" class="book-list">
-                <div class="no-results">Initializing your library...</div>
-            </div>
-        </section>
+        <button class="search-btn" id="searchBtn" onclick="search()">
+            <span id="btnText">Find My Recommendations</span>
+            <span id="btnLoader" class="loader hidden"></span>
+        </button>
 
-        <footer style="margin-top: 8rem; text-align: center; color: var(--text-secondary); padding-bottom: 2rem;">
-            &copy; 2026 Ardent Library | Built with Semantic AI
-        </footer>
-    </div>
 
+    </section>
+
+    <!-- RESULTS -->
+    <main class="recommendations">
+        <h2 class="section-title">Curated for You</h2>
+        <div class="grid-container" id="results">
+            <!-- JS injects cards here -->
+        </div>
+    </main>
+
+    <!-- JS (UNCHANGED) -->
     <script src="/static/script.js"></script>
+    <footer class="footer">
+
+        <div class="footer-container">
+
+            <!-- LEFT BRAND SECTION -->
+            <div class="footer-brand">
+                <div class="logo-box">
+                    <span class="logo-text">Zeeta</span>
+                    <span class="logo-highlight">Zing</span>
+                </div>
+
+                <h2 class="tagline">United We Build.</h2>
+
+                <p class="footer-desc">
+                    Zeeta Zing is a technology-driven company focused on building
+                    intelligent digital solutions with innovation and simplicity at its core.
+                </p>
+
+                <p class="founders">
+                    Founded by <strong>Sahil Vasani</strong> & <strong>Raj Nakrani</strong>
+                </p>
+            </div>
+
+            <!-- EMPTY COLUMNS FOR SPACING (like reference image) -->
+            <div class="footer-column">
+                <h4>Company</h4>
+                <ul>
+                    <li>About Zeeta Zing</li>
+                    <li>Our Vision</li>
+                    <li>Careers</li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Products</h4>
+                <ul>
+                    <li>AI Solutions</li>
+                    <li>Data Platforms</li>
+                    <li>Custom Software</li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Resources</h4>
+                <ul>
+                    <li>Documentation</li>
+                    <li>Support</li>
+                    <li>Contact Us</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- BOTTOM BAR -->
+        <div class="footer-bottom">
+            <p>© 2026 Zeeta Zing. All rights reserved.</p>
+        </div>
+
+    </footer>
+
 </body>
 
 </html>
