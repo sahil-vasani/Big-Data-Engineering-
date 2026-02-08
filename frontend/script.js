@@ -103,10 +103,7 @@ function renderBooks(books) {
         container.innerHTML += `
             <div class="book-card">
                 <div class="cover-wrapper">
-                    <span class="match-badge">
-                        ${Math.floor(85 + Math.random() * 10)}% Match
-                    </span>
-
+                      
                     <img src="${img}"
                          class="book-cover"
                          onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
