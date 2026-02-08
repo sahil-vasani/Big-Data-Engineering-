@@ -35,16 +35,16 @@ app.add_middleware(
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 
-if Path("Frontend").exists():
-    app.mount("/static", StaticFiles(directory="Frontend"), name="static")
+if Path("frontend").exists():
+    app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 
 from fastapi.responses import JSONResponse
 
 @app.get("/")
 def home():
-    if Path("Frontend/index.html").exists():
-        return FileResponse("Frontend/index.html")
+    if Path("frontend/index.html").exists():
+        return FileResponse("frontend/index.html")
     return {"message": "Backend API running. Frontend not deployed."}
 
 
@@ -144,6 +144,13 @@ def get_book_by_isbn(isbn: str):
     conn.close()
     return result
 
+@app.get("/debug-files")
+def debug_files():
+    return {
+        "cwd": os.getcwd(),
+        "files": os.listdir("."),
+        "frontend": os.listdir("frontend") if os.path.exists("frontend") else "NO FRONTEND"
+    }
 
 
 
