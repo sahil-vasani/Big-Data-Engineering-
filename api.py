@@ -31,26 +31,24 @@ app.add_middleware(
 
 # =========================
 # SERVE FRONTEND
-# =========================
-from pathlib import Path
+# =========================  
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+import os
 
-if Path("frontend").exists():
-    app.mount("/static", StaticFiles(directory="frontend"), name="static")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-
-from fastapi.responses import JSONResponse
+app.mount(
+    "/static",
+    StaticFiles(directory=os.path.join(BASE_DIR, "frontend")),
+    name="static"
+)
 
 @app.get("/")
 def home():
-    if Path("Frontend/index.html").exists():
-        return FileResponse("frontend/index.html")
-    return {"message": "Backend API running. Frontend not deployed."}
+    return FileResponse(os.path.join(BASE_DIR, "frontend", "index.html"))
 
-
-
-
-
+ 
 # =========================
 # HF CONFIG
 # =========================
