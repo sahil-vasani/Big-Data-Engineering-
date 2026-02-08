@@ -6,6 +6,7 @@
     --muted: #64748b;
 }
 
+/* ================= RESET ================= */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -17,10 +18,11 @@ body {
     font-family: "Inter", sans-serif;
     color: white;
 
-    /* ✅ Full-page background image with minor intensity reduction */
     background:
-        linear-gradient(rgba(0, 0, 0, 0.12),
-            rgba(0, 0, 0, 0.12)),
+        linear-gradient(
+            rgba(0, 0, 0, 0.06),
+            rgba(0, 0, 0, 0.06)
+        ),
         url("/static/library-bg.jpg") no-repeat center center fixed;
 
     background-size: cover;
@@ -30,23 +32,20 @@ body {
 .hero {
     height: 55vh;
     min-height: 480px;
-    background: transparent;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     text-align: center;
     padding: 0 20px;
-
-    /* ✅ No rounded edges anywhere */
-    border-radius: 0;
 }
 
 .hero h1 {
     font-family: "Playfair Display", serif;
     font-size: 3rem;
     max-width: 800px;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 16px 28px;
+    border-radius: 14px;
 }
 
 /* ================= SEARCH CARD ================= */
@@ -82,6 +81,7 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* ================= INPUTS ================= */
 .input-group {
     display: flex;
     gap: 12px;
@@ -96,13 +96,15 @@ input {
     border: 1px solid #e2e8f0;
     font-family: "Inter", sans-serif;
     font-size: 1rem;
+    background: #ffffff;
+    color: #0f172a;
 }
 
 textarea {
     resize: none;
-    background: #fffdf5;
 }
 
+/* ================= BUTTON ================= */
 .search-btn {
     width: 100%;
     padding: 16px;
@@ -113,6 +115,12 @@ textarea {
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.search-btn:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
 }
 
 /* ================= RESULTS ================= */
@@ -124,6 +132,7 @@ textarea {
     font-family: "Playfair Display", serif;
     font-size: 2rem;
     margin-bottom: 30px;
+    color: white;
 }
 
 /* ================= GRID ================= */
@@ -131,32 +140,6 @@ textarea {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 24px;
-}
-
-
-/* ✅ ISBN SINGLE RESULT HANDLING */
-.grid-container:has(.book-card:only-child) {
-    display: flex;
-    justify-content: center;
-}
-
-.grid-container:has(.book-card:only-child) .book-card {
-    max-width: 320px;
-}
-
-.grid-container:has(.book-card:only-child) .cover-wrapper {
-    height: 220px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.grid-container:has(.book-card:only-child) .book-cover {
-    width: auto;
-    max-width: 150px;
-    height: auto;
-    max-height: 220px;
-    object-fit: contain;
 }
 
 /* ================= BOOK CARD ================= */
@@ -226,8 +209,7 @@ textarea {
 
 /* ================= FOOTER ================= */
 .footer {
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(2px);
+    background: rgba(0, 0, 0, 0.75);
     color: #ffffff;
     padding: 70px 6% 30px;
 }
@@ -240,90 +222,7 @@ textarea {
     margin: auto;
 }
 
-.footer-brand {
-    max-width: 420px;
-}
-
-.logo-box {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 20px;
-}
-
-.logo-text {
-    color: #ffffff;
-}
-
-.logo-highlight {
-    color: #22d3ee;
-    margin-left: 6px;
-}
-
-.tagline {
-    font-family: "Playfair Display", serif;
-    font-size: 1.8rem;
-    margin-bottom: 15px;
-}
-
-.footer-desc {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: #cbd5f5;
-    margin-bottom: 16px;
-}
-
-.founders {
-    font-size: 0.95rem;
-    color: #e0e7ff;
-}
-
-.footer-column h4 {
-    font-size: 1.1rem;
-    margin-bottom: 16px;
-}
-
-.footer-column ul {
-    list-style: none;
-}
-
-.footer-column ul li {
-    margin-bottom: 10px;
-    font-size: 0.95rem;
-    color: #cbd5f5;
-}
-
 /* ================= RESPONSIVE ================= */
-@media (max-width: 768px) {
-    .hero h1 {
-        font-size: 2rem;
-    }
-
-    .input-group {
-        flex-direction: column;
-    }
-
-    .hero {
-        border-radius: 0;
-        /* ✅ still flat */
-    }
-}
-
-@media (max-width: 900px) {
-    .footer-container {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 600px) {
-    .footer-container {
-        grid-template-columns: 1fr;
-    }
-
-    .footer {
-        text-align: center;
-    }
-}
-
 @media (max-width: 1200px) {
     .grid-container {
         grid-template-columns: repeat(4, 1fr);
@@ -340,6 +239,14 @@ textarea {
     .grid-container {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 480px) {
@@ -348,6 +255,7 @@ textarea {
     }
 }
 
+/* ================= LOADER ================= */
 .loader {
     width: 20px;
     height: 20px;
@@ -355,18 +263,11 @@ textarea {
     border-top: 3px solid white;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
-    display: inline-block;
-    vertical-align: middle;
     margin-left: 10px;
 }
 
 .hidden {
     display: none;
-}
-
-.search-btn:disabled {
-    opacity: 0.75;
-    cursor: not-allowed;
 }
 
 @keyframes spin {
