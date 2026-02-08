@@ -45,10 +45,8 @@ from fastapi.responses import JSONResponse
 def home():
     if Path("frontend/index.html").exists():
         return FileResponse("frontend/index.html")
-    return JSONResponse(
-        status_code=200,
-        content={"message": "Backend API running. Frontend not deployed."}
-    )
+    return {"message": "Backend API running. Frontend not deployed."}
+
 
 
 
