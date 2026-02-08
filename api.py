@@ -39,9 +39,17 @@ if Path("frontend").exists():
     app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 
+from fastapi.responses import JSONResponse
+
 @app.get("/")
 def home():
-    return FileResponse("frontend/index.html")
+    if Path("frontend/index.html").exists():
+        return FileResponse("frontend/index.html")
+    return JSONResponse(
+        status_code=200,
+        content={"message": "Backend API running. Frontend not deployed."}
+    )
+
 
 
 # =========================
