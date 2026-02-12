@@ -64,7 +64,7 @@ Overall, the dataset is **clean, diverse, and semantically rich**, making it sui
 ## 🗂️ Project Structure
 
 ```text
-dummy/
+BIG-DATA-ENGINEERING-/
 ├── api.py                      # Main FastAPI application & API routes
 ├── book_recommender.py         # Core recommendation logic & text parsing
 ├── requirements.txt            # Python library dependencies
@@ -76,14 +76,23 @@ dummy/
 │   ├── script.js               # Frontend API interaction logic
 │   └── library-bg.jpg          # UI background asset
 │
-├── scripts/                    # Pre-deployment utility scripts
-│   ├── fetch_description.py    # Metadata enrichment script
-│   ├── create_embeddings.py    # Vector generation script (Offline)
-│   └── migrate_db.py           # SQLite migration utility
+├── images/                   
+│   ├── ui_home.png             
+│   └── ui_results.png          
 │
-├── .gitignore                  # Files to ignore (e.g., .env, venv, cache)
-└── README.md                   # (Original README)
-└── readme_.md                  # (Extended Documentation - Current)
+├── data/                   
+│   ├── raw_data              
+│       └── dau_library_data.csv  #row data        
+│   └── processed     
+│       └── dau_with_description.csv #processed data
+│
+├── fetch_description/                    
+│   ├── fetch_description.py    
+│
+├── logs/                    
+│   ├── prompt.md 
+│   
+└── README.md                   
 ```
 
 ---
