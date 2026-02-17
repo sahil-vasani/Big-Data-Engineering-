@@ -6,6 +6,23 @@ The system provides personalized book recommendations based on user queries and 
 
 ---
 
+## 📌 Table Content 
+- [🚀 Features](#-features)
+- [📊 Dataset Statistics](#-dataset-statistics)
+- [🗂️ Project Structure](#️-project-structure)
+- [🧠 System Architecture](#-system-architecture)
+- [📦 Model & Assets Hosting](#-model--assets-hosting)
+- [⚙️ Technical Specifications](#️-technical-specifications)
+- [🆘 Help & Troubleshooting Guide](#-help--troubleshooting-guide)
+- [👤 Authors](#-authors)
+
+---
+
+## 🚀 Public URL :
+URL : https://web-production-7db7.up.railway.app/
+
+---
+
 ## 🚀 Features
 
 - 🔍 **Semantic book search** using Sentence Transformers (Context-aware search).
@@ -310,11 +327,220 @@ git push origin main
 
 ---
 
-## 💡 Troubleshooting
 
-*   **App won't start?** Ensure `HF_TOKEN` is correct if the repository is private.
-*   **Slow first load?** The app must download the model on the first boot. This can take 1-2 minutes depending on connection.
-*   **Port issues on Railway?** Railway injects a dynamic `${PORT}` variable; ensure your start command uses it.
+# 🆘 Help & Troubleshooting Guide
+
+This section provides solutions to common issues encountered during setup, deployment, and runtime.
+
+---
+
+## 🔑 Authentication Issues
+
+### ❌ Error: 401 Unauthorized or model download fails
+**Cause:** Missing or invalid Hugging Face access token.
+
+**Solution:**
+
+Verify token exists:
+
+```bash
+echo $HF_TOKEN
+```
+
+If empty, set the token:
+
+**Linux/macOS**
+
+```bash
+export HF_TOKEN=hf_your_token_here
+```
+
+**Windows**
+
+```bash
+setx HF_TOKEN "hf_your_token_here"
+```
+
+Restart the application.
+
+### ❌ Error: Repository Not Found or Access Denied
+**Cause:** Private repository without proper permissions.
+
+**Solution:**
+- Ensure token has Read access
+- Verify repository exists:  
+  https://huggingface.co/dummy9016/book-recommender-assets
+
+---
+
+## 🚀 Application Startup Issues
+
+### ❌ Error: ModuleNotFoundError
+**Cause:** Missing dependencies.
+
+**Solution:**
+```bash
+pip install -r requirements.txt
+```
+
+### ❌ Error: Port already in use
+**Cause:** Port 8000 already occupied.
+
+**Solution:**
+```bash
+uvicorn api:app --reload --port 8001
+```
+
+### ❌ Error: Uvicorn not recognized
+**Cause:** Virtual environment not activated.
+
+**Solution:**
+
+**Windows**
+```bash
+venv\Scripts\activate
+```
+
+**Linux/macOS**
+```bash
+source venv/bin/activate
+```
+
+---
+
+## 🤖 Model & Embedding Issues
+
+### ❌ Slow startup on first run
+**Cause:** Model and embeddings downloading from Hugging Face.
+
+**Expected behavior:** First run may take 1–3 minutes.
+
+**Solution:** No action needed. Files will be cached automatically.
+
+### ❌ Error: embeddings.npy not found
+**Cause:** Download failed or incomplete.
+
+**Solution:**
+```bash
+rm -rf .cache/huggingface
+```
+
+Restart app:
+```bash
+uvicorn api:app --reload
+```
+
+---
+
+## 🌐 API Issues
+
+### ❌ Error: 405 Method Not Allowed
+**Cause:** Using wrong HTTP method.
+
+**Correct usage:**
+```
+POST /recommend
+```
+
+**Example request:**
+```json
+{
+  "description": "machine learning neural networks"
+}
+```
+
+### ❌ Error: CORS blocked request
+**Cause:** Frontend and backend running on different domains.
+
+**Solution:** Enable CORS in FastAPI:
+
+```python
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+---
+
+## 🐳 Docker Issues
+
+### ❌ Container exits immediately
+**Cause:** Missing environment variables.
+
+**Solution:**
+```bash
+docker run -p 8000:8000 -e HF_TOKEN=your_token book-recommender
+```
+
+### ❌ Error: Out of disk space
+**Cause:** Model files require storage.
+
+**Solution:**
+- Free disk space
+- Use Hugging Face asset hosting (recommended)
+
+---
+
+## ☁️ Railway Deployment Issues
+
+### ❌ App crashes after deploy
+Check Railway → Project → Variables
+
+Ensure:
+```
+HF_TOKEN=hf_xxxxx
+HF_HOME=/app/.cache/huggingface
+```
+
+### ❌ App stuck on deploying
+Set correct start command:
+```bash
+uvicorn api:app --host 0.0.0.0 --port ${PORT:-8080}
+```
+
+---
+
+## 🖥️ Frontend Issues
+
+### ❌ Books not loading
+**Cause:** Backend not running or wrong API URL.
+
+**Solution:**
+- Check backend: http://localhost:8000/docs  
+- Update frontend API URL if needed:
+
+```js
+const API_URL = "http://localhost:8000";
+```
+
+### ❌ Images not displaying
+**Cause:** Invalid image URL or network issue.
+
+**Solution:**
+- Verify image links in dataset
+- Check browser console for errors
+
+---
+
+## ⚡ Performance Optimization Tips
+
+Use Hugging Face cache:
+
+```bash
+export HF_HOME=.cache/huggingface
+```
+
+Run production server:
+
+```bash
+uvicorn api:app --host 0.0.0.0 --port 8000 --workers 4
+```
 
 ---
 
@@ -348,10 +574,5 @@ Specialist in Data Engineering, Vector Databases, and Cloud AI deployment strate
 ### 📖 Recommendation Results
 ![Recommendation Results UI](images/ui_results.png)
 
-
---- 
-
-## 🚀 Public URL :
-URL : https://web-production-7db7.up.railway.app/
 
 ---
