@@ -6,15 +6,21 @@ The system provides personalized book recommendations based on user queries and 
 
 ---
 
-## 📌 Table Content 
+## 📌 Overview
 - [🚀 Features](#-features)
 - [📊 Dataset Statistics](#-dataset-statistics)
 - [🗂️ Project Structure](#️-project-structure)
+- [🛠️ Data Enrichment & Database Pipeline](#️-data-enrichment--database-pipeline)
 - [🧠 System Architecture](#-system-architecture)
 - [📦 Model & Assets Hosting](#-model--assets-hosting)
+- [🔑 Hugging Face Token Setup (IMPORTANT)](#-hugging-face-token-setup-important)
+- [🔧 Installation & Running (Local)](#-installation--running-local)
+- [🧪 API Endpoints Documentation](#-api-endpoints-documentation)
 - [⚙️ Technical Specifications](#️-technical-specifications)
 - [🆘 Help & Troubleshooting Guide](#-help--troubleshooting-guide)
 - [👤 Authors](#-authors)
+- [🖼️ User Interface Preview](#️-user-interface-preview)
+
 
 ---
 
@@ -111,6 +117,45 @@ BIG-DATA-ENGINEERING-/
 │   
 └── README.md                   
 ```
+
+---
+
+## 🔄 Data Enrichment & Database Pipeline
+
+To ensure high-quality recommendations, the raw library data undergoes a multi-stage enrichment pipeline before being indexed.
+
+### Pipeline Overview
+`Raw CSV` ➔ `Enrichment Script` ➔ `Cleaning` ➔ `Vectorization` ➔ `Production Database`
+
+### 1. Data Ingestion
+- **Source**: Raw library catalog (`dau_library_data.csv`).
+- **Fields**: ISBN, Title, Author, Year, Publisher.
+
+### 2. Multi-Stage Enrichment (`fetch_description.py`)
+The system employs a fallback strategy to fetch missing book descriptions and cover images:
+1.  **OpenLibrary API**: Queries by ISBN to fetch descriptions and covers.
+2.  **Google Books HTML**: Scrapes the Google Books public page if OpenLibrary fails.
+3.  **Google Books API**: Uses `Title + Author` search as a final fallback for books with missing/invalid ISBNs.
+
+### 3. Cleaning & Normalization
+- **Deduplication**: Removes duplicate ISBNs.
+- **Filtering**: Drops entries with missing descriptions or cover images.
+- **Normalization**: Text is cleaned (lowercase, punctuation removal) for consistent processing.
+
+### 4. Vectorization (Offline)
+- **Model**: `all-MiniLM-L6-v2`
+- **Process**: Each book description is converted into a **384-dimensional dense vector**.
+- **Storage**: Vectors are saved as a NumPy array (`book_embeddings.npy`) for fast loading.
+
+### 5. Database Construction (SQLite3)
+- **Structure**: All enriched book metadata is stored in a **SQLite3** database (`books.db`).
+- **Why SQLite?** It is serverless, file-based, and extremely lightweight. This makes it perfect for **FastAPI** deployments, allowing for high-speed metadata retrieval without the latency or complexity of connecting to an external database server like PostgreSQL or MySQL.
+
+### 6. Asset Distribution
+- **Hugging Face Hub**: The heavy files (Embeddings `book_embeddings.npy`, Database `books.db`, Model) are pushed to Hugging Face to decouple them from the application logic.
+- **GitHub**: Only lightweight code is stored here.
+
+---
 
 ---
 
